@@ -1,0 +1,15 @@
+server {
+    server_name www.example.dev;
+    return 301 $scheme://example.dev$request_uri;
+}
+server {
+    server_name example.dev;
+
+    autoindex on;
+
+    root $basedir/example;
+    index index.html index.php;
+    fastcgi_keep_conn on; # keep alive to the FCGI upstream
+
+    include apps/php.conf;
+}

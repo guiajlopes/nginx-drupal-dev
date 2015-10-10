@@ -1,0 +1,40 @@
+server {
+    listen 80 default_server;
+    server_name .dev .test .l;
+    set $domain $host;
+
+    if ($domain ~ "([^.]+)\.dev$") {
+        set $dir $1;
+        set $subdir dev;
+    }
+    if ($domain ~ "([^.]+)\.test$") {
+        set $dir $1;
+        set $subdir test;
+    }
+    if ($domain ~ "([^.]+)\.l$") {
+        set $dir $1;
+        set $subdir docroot;
+    }
+    if (-f $basedir/$dir/index.php) {
+        set $path $dir;
+    }
+    if (-f $basedir/$dir/index.html) {
+        set $path $dir;
+    }
+    if (-d $basedir/$dir/$subdir) {
+        set $path "${dir}/${subdir}";
+    }
+    if (-d $basedir/$dir/docroot) {
+        set $path "${dir}/docroot";
+    }
+
+    root $basedir/$path;
+    autoindex on;
+    index index.html index.php;
+    fastcgi_keep_conn on; # keep alive to the FCGI upstream
+    include apps/drupal.conf;
+    include apps/php.conf;
+
+    ## If you're using a module like search404 then 404's *have *to be handled by Drupal. Uncomment.
+    ## error_page 404 /index.php;
+}
